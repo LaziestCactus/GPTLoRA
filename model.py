@@ -3,6 +3,7 @@ from peft import get_peft_model, LoraConfig, TaskType
 from transformers import TrainingArguments, Trainer
 from loadData import LoRAdata
 from LoRAdataset import PreprocessedDataset
+from torch.utils.data import DataLoader
 from torch.amp import autocast
 import torch
 import os
@@ -34,8 +35,15 @@ Tokenized_data = LoRAdata(dataname)
 train_key, train_label = Tokenized_data.getTrain()
 val_key, val_label = Tokenized_data.getVal()
 
+# Make sure it's divisible by batch size
+batch_size = 32
+train_key = train_key[:len(train_key) // batch_size * batch_size]
+train_label = train_label[:len(train_label) // batch_size * batch_size]
+val_key = val_key[:len(val_key) // batch_size * batch_size]
+val_label = val_label[:len(val_label) // batch_size * batch_size]
+
 train_dataset = PreprocessedDataset(train_key, train_label)
-val_dataset = PreprocessedDataset(val_key, val_label)
+val_dataset = PreprocessedDataset(val_key, val_label) 
 
 # Define training arguments
 num_epochs = 1  # Number of training epochs
@@ -56,7 +64,7 @@ trainer = Trainer(
     model=model,                     # The model you are fine-tuning
     args=training_args,              # Training arguments
     train_dataset=train_dataset,     # Your training dataset
-    eval_dataset=val_dataset,       # Your evaluation dataset (optional)
+    eval_dataset=val_dataset,
 )
 
 
@@ -86,3 +94,5 @@ print(f"Model is on device: {next(model.parameters()).device}")
 print_model_size(training_args.output_dir)
 print_trainable_parameters(model, "Before training")
 trainer.train()
+
+trainer.save_model("./lora-model")

@@ -22,7 +22,8 @@ class LoRAdata():
     def getTrain(self):
         data = torch.tensor(self.encode(self.text), dtype=torch.long)
         # Let's now split up the data into train and validation sets
-        n = int(0.9*len(data)) # first 90% will be train, rest val
+        n = int(0.1*len(data)) # first 90% will be train, rest val   
+        #shorten for now to 10% for testing purposes
         part = data[:n]
         x = torch.tensor(part[:-1], dtype=torch.long)
         y = torch.tensor(part[1:], dtype=torch.long)
