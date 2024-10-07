@@ -20,6 +20,7 @@ lora_config = LoraConfig(
     r=8,  # Rank of the low-rank adaptation matrices
     lora_alpha=32,  # LoRA scaling factor
     lora_dropout=0.1,  # Dropout for LoRA layers
+    target_modules = ["c_attn", "c_proj"]
 )
 
 # Prepare model for LoRA tuning
@@ -35,7 +36,7 @@ Tokenized_data = LoRAdata(dataname)
 train_key, train_label = Tokenized_data.getTrain()
 val_key, val_label = Tokenized_data.getVal()
 
-# Make sure it's divisible by batch size
+# Make sure it's divisible by batch size so last batch works fine
 batch_size = 32
 train_key = train_key[:len(train_key) // batch_size * batch_size]
 train_label = train_label[:len(train_label) // batch_size * batch_size]
@@ -67,10 +68,6 @@ trainer = Trainer(
     eval_dataset=val_dataset,
 )
 
-
-
-
-
 # Get model sizes
 def print_model_size(path):
     size = 0
@@ -84,10 +81,6 @@ def print_trainable_parameters(model, label):
         parameters += p.numel()
         trainable += p.numel() if p.requires_grad else 0
     print(f"{label} trainable parameters: {trainable:,}/{parameters:,} ({100 * trainable / parameters:.2f}%)")
-
-
-
-
 
 #Fine-tune the model
 print(f"Model is on device: {next(model.parameters()).device}")

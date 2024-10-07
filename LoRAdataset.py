@@ -17,10 +17,3 @@ class PreprocessedDataset(Dataset):
             'input_ids': x,
             'labels': y
         }
-    
-    '''
-    def __getitem__(self, idx):
-        x = torch.tensor(self.inputs[idx], dtype=torch.long)
-        y = torch.tensor(self.targets[idx], dtype=torch.long)
-        return x, y
-    '''
